@@ -58,10 +58,13 @@ the JSON Lines files directly.
 ## CLI
 
 ```bash
-npx klaro init      # scaffold klaro.config.ts
-npx klaro doctor     # check provider keys, env, local runtime health
+npx klaro init       # scaffold klaro.config.ts
+npx klaro doctor     # provider connectivity (real API check), retry health, cost-optimization recommendations, health score
 npx klaro inspect    # recent requests: latency, redactions
-npx klaro stats      # local spend + request counts
+npx klaro stats      # "Today's AI Health": retries saved, secrets/PII removed, cost, latency, budget remaining, health score
+npx klaro explain    # plain-language narration of a call's full retry/redaction history
+npx klaro simulate   # runs rate-limit/500/timeout/bad-JSON/injection/huge-prompt scenarios through YOUR configured pipeline
+npx klaro version
 ```
 
 ## Middleware

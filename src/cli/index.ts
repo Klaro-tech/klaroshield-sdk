@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+import { readFileSync } from "node:fs"
+import { fileURLToPath } from "node:url"
+import { join, dirname } from "node:path"
 import { Command } from "commander"
 import { doctor } from "./commands/doctor.js"
 import { stats } from "./commands/stats.js"
@@ -8,12 +11,19 @@ import { version } from "./commands/version.js"
 import { explain } from "./commands/explain.js"
 import { simulate } from "./commands/simulate.js"
 
+// Read once at startup rather than hardcoding a second copy of the version
+// string here -- a hardcoded string previously drifted from
+// package.json's real version the moment a release changed one but not
+// the other (this line still said "0.1.0" after 0.2.0 shipped).
+const here = dirname(fileURLToPath(import.meta.url))
+const pkg = JSON.parse(readFileSync(join(here, "..", "..", "package.json"), "utf8")) as { version: string }
+
 const program = new Command()
 
 program
   .name("klaro")
   .description("KlaroShield CLI — local diagnostics for the AI runtime, no cloud account required.")
-  .version("0.1.0")
+  .version(pkg.version)
 
 program
   .command("init")
