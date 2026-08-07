@@ -20,9 +20,9 @@ export function appendJsonLine(file: string, record: unknown): void {
   appendFileSync(join(dir, `${file}.jsonl`), JSON.stringify(record) + "\n", "utf8")
 }
 
-/** Reads every JSON line back -- used by `klaro stats`/`klaro inspect` and by budget()'s running-total calculation. Corrupt/partial trailing lines (e.g. a process killed mid-write) are skipped rather than failing the whole read. */
+/** Reads every JSON line back -- used by `klaro stats`/`klaro inspect` and by budget()'s running-total calculation. Corrupt/partial trailing lines (e.g. a process killed mid-write) are skipped rather than failing the whole read. Never creates .klaro/ as a side effect -- a read that finds nothing should report nothing exists yet, not silently create the directory (doctor's ".klaro/ local storage" check depends on this). */
 export function readJsonLines<T = unknown>(file: string): T[] {
-  const dir = ensureDir()
+  const dir = join(process.cwd(), KLARO_DIR)
   const path = join(dir, `${file}.jsonl`)
   if (!existsSync(path)) return []
   const raw = readFileSync(path, "utf8")
@@ -40,7 +40,7 @@ export function readJsonLines<T = unknown>(file: string): T[] {
 
 /** Small key-value store for things that aren't append-only logs (e.g. the resolved config from `klaro init`). */
 export function readJson<T>(file: string, fallback: T): T {
-  const dir = ensureDir()
+  const dir = join(process.cwd(), KLARO_DIR)
   const path = join(dir, `${file}.json`)
   if (!existsSync(path)) return fallback
   try {
