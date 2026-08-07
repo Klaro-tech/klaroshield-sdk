@@ -9,3 +9,4 @@ export { validation, type ValidationOptions, type ZodLikeSchema } from "./middle
 export { logging, type LoggingOptions } from "./middleware/logging.js"
 
 export { simulate, ALL_SCENARIOS, type SimulationScenario, type SimulationResult } from "./simulate.js"
+export { benchmark, type BenchmarkResult, type ProviderBenchmark } from "./benchmark.js"

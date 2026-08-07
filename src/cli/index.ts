@@ -10,6 +10,7 @@ import { init } from "./commands/init.js"
 import { version } from "./commands/version.js"
 import { explain } from "./commands/explain.js"
 import { simulate } from "./commands/simulate.js"
+import { benchmark } from "./commands/benchmark.js"
 
 // Read once at startup rather than hardcoding a second copy of the version
 // string here -- a hardcoded string previously drifted from
@@ -60,5 +61,10 @@ program
   .command("simulate")
   .description("Run common failure modes (rate limits, timeouts, bad JSON, ...) through your configured pipeline")
   .action(simulate)
+
+program
+  .command("benchmark")
+  .description("Compare latency and cost across providers with a real test call, recommend the cheapest")
+  .action(benchmark)
 
 program.parse()
