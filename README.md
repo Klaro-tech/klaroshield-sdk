@@ -41,6 +41,15 @@ const response = await chat({
 you're calling OpenAI, Anthropic, or a Vercel AI SDK `generateText` call,
 because it wraps *your* call, not a specific provider's API shape.
 
+**A real TypeScript caveat, not a runtime issue:** wrapping a class method
+via `.bind()` (required so `this` still resolves inside the provider SDK)
+goes through `Function.prototype.bind`'s own deliberately weak type
+signature, which loses overload resolution for methods like OpenAI's
+`create()` that return a different type for `stream: true` vs `stream:
+false`. Runtime behavior is correct either way; if TypeScript can't narrow
+the result type, cast it explicitly (`as ChatCompletion`, `as Message`) —
+see `examples/openai.ts` and `examples/anthropic.ts`.
+
 Every middleware runs entirely in-process. Nothing here calls out to a
 KlaroShield server. `.klaro/` (created in your project root on first use)
 holds local logs and spend records — inspect it with the CLI, or just read
