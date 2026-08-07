@@ -11,6 +11,7 @@ import { version } from "./commands/version.js"
 import { explain } from "./commands/explain.js"
 import { simulate } from "./commands/simulate.js"
 import { benchmark } from "./commands/benchmark.js"
+import { dashboard } from "./commands/dashboard.js"
 
 // Read once at startup rather than hardcoding a second copy of the version
 // string here -- a hardcoded string previously drifted from
@@ -66,5 +67,11 @@ program
   .command("benchmark")
   .description("Compare latency and cost across providers with a real test call, recommend the cheapest")
   .action(benchmark)
+
+program
+  .command("dashboard")
+  .description("Open a local web dashboard (requests, cost, redactions, health) -- nothing leaves this machine")
+  .option("-p, --port <port>", "port to listen on", "3456")
+  .action((opts) => dashboard(Number(opts.port)))
 
 program.parse()
