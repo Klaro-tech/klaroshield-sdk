@@ -7,3 +7,5 @@ export { secrets, type SecretsOptions } from "./middleware/secrets.js"
 export { pii, type PiiOptions, type PiiType } from "./middleware/pii.js"
 export { validation, type ValidationOptions, type ZodLikeSchema } from "./middleware/validation.js"
 export { logging, type LoggingOptions } from "./middleware/logging.js"
+
+export { simulate, ALL_SCENARIOS, type SimulationScenario, type SimulationResult } from "./simulate.js"

@@ -6,6 +6,7 @@ import { inspect } from "./commands/inspect.js"
 import { init } from "./commands/init.js"
 import { version } from "./commands/version.js"
 import { explain } from "./commands/explain.js"
+import { simulate } from "./commands/simulate.js"
 
 const program = new Command()
 
@@ -44,5 +45,10 @@ program
   .command("explain [callId]")
   .description("Narrate what happened on a call (most recent by default) in plain language")
   .action((callId) => explain(callId))
+
+program
+  .command("simulate")
+  .description("Run common failure modes (rate limits, timeouts, bad JSON, ...) through your configured pipeline")
+  .action(simulate)
 
 program.parse()
