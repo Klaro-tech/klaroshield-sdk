@@ -4,6 +4,7 @@ import { doctor } from "./commands/doctor.js"
 import { stats } from "./commands/stats.js"
 import { inspect } from "./commands/inspect.js"
 import { init } from "./commands/init.js"
+import { version } from "./commands/version.js"
 
 const program = new Command()
 
@@ -32,5 +33,10 @@ program
   .command("stats")
   .description("Show local token spend and request counts by model")
   .action(stats)
+
+program
+  .command("version")
+  .description("Show the installed klaroshield SDK/CLI version")
+  .action(version)
 
 program.parse()
