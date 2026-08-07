@@ -5,6 +5,7 @@ import { stats } from "./commands/stats.js"
 import { inspect } from "./commands/inspect.js"
 import { init } from "./commands/init.js"
 import { version } from "./commands/version.js"
+import { explain } from "./commands/explain.js"
 
 const program = new Command()
 
@@ -38,5 +39,10 @@ program
   .command("version")
   .description("Show the installed klaroshield SDK/CLI version")
   .action(version)
+
+program
+  .command("explain [callId]")
+  .description("Narrate what happened on a call (most recent by default) in plain language")
+  .action((callId) => explain(callId))
 
 program.parse()
