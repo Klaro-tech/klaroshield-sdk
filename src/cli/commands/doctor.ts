@@ -1,5 +1,7 @@
 import { existsSync } from "node:fs"
 import { join } from "node:path"
+import pc from "picocolors"
+import ora from "ora"
 import { readJsonLines } from "../../storage/local-store.js"
 import { PRICING_TABLE, findPricing } from "../../middleware/pricing-table.js"
 
@@ -146,31 +148,39 @@ function computeHealthScore(checks: Check[]): number {
 }
 
 export async function doctor(): Promise<void> {
-  console.log("────────────────────────────")
-  console.log("\x1b[1mAI Runtime Health\x1b[0m")
-  console.log("────────────────────────────\n")
+  console.log(pc.dim("────────────────────────────"))
+  console.log(pc.bold("AI Runtime Health"))
+  console.log(pc.dim("────────────────────────────\n"))
 
-  const checks: Check[] = [
-    checkNodeVersion(),
-    await checkProviderConnection("OpenAI", "OPENAI_API_KEY", "https://api.openai.com/v1/models", (k) => ({ Authorization: `Bearer ${k}` })),
-    await checkProviderConnection("Claude", "ANTHROPIC_API_KEY", "https://api.anthropic.com/v1/models", (k) => ({ "x-api-key": k, "anthropic-version": "2023-06-01" })),
-    await checkProviderConnection("Gemini", "GEMINI_API_KEY", "https://generativelanguage.googleapis.com/v1beta/models", (k) => ({ "x-goog-api-key": k })),
-    checkRetryHealth(),
-    checkKlaroDir(),
-  ]
+  const localChecks = [checkNodeVersion()]
+
+  // Previously three separate `await`s in sequence -- each provider check
+  // waited for the last to finish even though they're fully independent
+  // network calls. Confirmed this was real added latency, not just a
+  // style issue; Promise.all cuts doctor's wall-clock time to the
+  // slowest single check instead of the sum of all three.
+  const spinner = ora("Checking provider connectivity...").start()
+  const providerChecks = await Promise.all([
+    checkProviderConnection("OpenAI", "OPENAI_API_KEY", "https://api.openai.com/v1/models", (k) => ({ Authorization: `Bearer ${k}` })),
+    checkProviderConnection("Claude", "ANTHROPIC_API_KEY", "https://api.anthropic.com/v1/models", (k) => ({ "x-api-key": k, "anthropic-version": "2023-06-01" })),
+    checkProviderConnection("Gemini", "GEMINI_API_KEY", "https://generativelanguage.googleapis.com/v1beta/models", (k) => ({ "x-goog-api-key": k })),
+  ])
+  spinner.stop()
+
+  const checks: Check[] = [...localChecks, ...providerChecks, checkRetryHealth(), checkKlaroDir()]
 
   for (const c of checks) {
-    const icon = c.ok ? "\x1b[32m✓\x1b[0m" : c.warn ? "\x1b[33m⚠\x1b[0m" : "\x1b[31m✗\x1b[0m"
-    console.log(`${icon} ${c.name.padEnd(24)} ${c.detail}`)
+    const icon = c.ok ? pc.green("✓") : c.warn ? pc.yellow("⚠") : pc.red("✗")
+    console.log(`${icon} ${c.name.padEnd(24)} ${pc.dim(c.detail)}`)
   }
 
   const recommendation = findCostRecommendation()
   if (recommendation) {
-    console.log(`\n\x1b[33m⚠\x1b[0m ${recommendation.currentModel} costs ${recommendation.savingsPct.toFixed(0)}% more than ${recommendation.suggestedModel} for comparable output`)
-    console.log(`   Potential savings: $${(recommendation.currentCostUsd - recommendation.suggestedCostUsd).toFixed(2)} based on your recorded usage`)
+    console.log(`\n${pc.yellow("⚠")} ${recommendation.currentModel} costs ${recommendation.savingsPct.toFixed(0)}% more than ${pc.bold(recommendation.suggestedModel)} for comparable output`)
+    console.log(`  Potential savings: ${pc.green(`$${(recommendation.currentCostUsd - recommendation.suggestedCostUsd).toFixed(2)}`)} based on your recorded usage`)
   }
 
   const score = computeHealthScore(checks)
-  const scoreColor = score >= 90 ? "\x1b[32m" : score >= 70 ? "\x1b[33m" : "\x1b[31m"
-  console.log(`\nHealth Score: ${scoreColor}${score}/100\x1b[0m`)
+  const scoreText = score >= 90 ? pc.green(`${score}/100`) : score >= 70 ? pc.yellow(`${score}/100`) : pc.red(`${score}/100`)
+  console.log(`\n${pc.bold("Health Score:")} ${scoreText}`)
 }

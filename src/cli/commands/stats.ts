@@ -1,3 +1,4 @@
+import pc from "picocolors"
 import { readJsonLines, readJson } from "../../storage/local-store.js"
 
 interface LogRecord {
@@ -57,12 +58,12 @@ export function stats(): void {
   const monthKey = currentMonthKey()
   const monthSpend = spend.filter((s) => s.timestamp.startsWith(monthKey)).reduce((sum, s) => sum + s.costUsd, 0)
 
-  console.log("────────────────────────────")
-  console.log("\x1b[1mToday's AI Health\x1b[0m")
-  console.log("────────────────────────────\n")
+  console.log(pc.dim("────────────────────────────"))
+  console.log(pc.bold("Today's AI Health"))
+  console.log(pc.dim("────────────────────────────\n"))
 
   if (todaysLogs.length === 0) {
-    console.log("No calls yet today. Showing all-time totals instead:\n")
+    console.log(pc.dim("No calls yet today. Showing all-time totals instead:\n"))
   }
 
   const relevantLogs = todaysLogs.length > 0 ? todaysLogs : logs
@@ -77,20 +78,20 @@ export function stats(): void {
   const retryRate = relevantLogs.filter((l) => l.attempt > 1).length / relevantLogs.length
   const failureRate = failed / relevantLogs.length
 
-  console.log(`\x1b[32m✓\x1b[0m Retries Saved       ${retriesSaved}`)
-  console.log(`\x1b[32m✓\x1b[0m Secrets Removed     ${secretsRemoved}`)
-  console.log(`\x1b[32m✓\x1b[0m PII Removed         ${piiRemoved}`)
-  console.log(`\x1b[32m✓\x1b[0m Cost Today          $${costToday.toFixed(2)}`)
-  console.log(`\x1b[32m✓\x1b[0m Average Latency     ${avgLatency.toFixed(0)} ms`)
+  console.log(`${pc.green("✓")} Retries Saved       ${retriesSaved}`)
+  console.log(`${pc.green("✓")} Secrets Removed     ${secretsRemoved}`)
+  console.log(`${pc.green("✓")} PII Removed         ${piiRemoved}`)
+  console.log(`${pc.green("✓")} Cost Today          $${costToday.toFixed(2)}`)
+  console.log(`${pc.green("✓")} Average Latency     ${avgLatency.toFixed(0)} ms`)
   if (budgetConfig) {
     const remaining = Math.max(0, budgetConfig.maxMonthlyUsd - monthSpend)
-    console.log(`\x1b[32m✓\x1b[0m Budget Remaining    $${remaining.toFixed(2)}`)
+    console.log(`${pc.green("✓")} Budget Remaining    $${remaining.toFixed(2)}`)
   } else {
-    console.log(`\x1b[33m⚠\x1b[0m Budget Remaining    no budget() middleware configured -- add .use(budget({ maxMonthlyUsd })) to track this`)
+    console.log(`${pc.yellow("⚠")} Budget Remaining    ${pc.dim("no budget() middleware configured -- add .use(budget({ maxMonthlyUsd })) to track this")}`)
   }
 
   const score = computeHealthScore(retryRate, failureRate)
-  const scoreColor = score >= 90 ? "\x1b[32m" : score >= 70 ? "\x1b[33m" : "\x1b[31m"
-  console.log(`\nHealth Score: ${scoreColor}${score}/100\x1b[0m`)
-  console.log(`\n(${relevantLogs.length} call${relevantLogs.length === 1 ? "" : "s"}, ${failed} failed, all-time spend $${spend.reduce((s, r) => s + r.costUsd, 0).toFixed(2)})`)
+  const scoreText = score >= 90 ? pc.green(`${score}/100`) : score >= 70 ? pc.yellow(`${score}/100`) : pc.red(`${score}/100`)
+  console.log(`\n${pc.bold("Health Score:")} ${scoreText}`)
+  console.log(pc.dim(`\n(${relevantLogs.length} call${relevantLogs.length === 1 ? "" : "s"}, ${failed} failed, all-time spend $${spend.reduce((s, r) => s + r.costUsd, 0).toFixed(2)})`))
 }

@@ -1,4 +1,5 @@
 import { exec } from "node:child_process"
+import pc from "picocolors"
 import { startDashboardServer } from "../../dashboard/server.js"
 
 // Cross-platform "open in default browser" without adding a dependency
@@ -27,8 +28,8 @@ function openBrowser(url: string): void {
 export function dashboard(port: number): void {
   const server = startDashboardServer(port)
   const url = `http://localhost:${port}`
-  console.log(`\x1b[1mklaroshield dashboard\x1b[0m running at ${url}`)
-  console.log("Local only — reads .klaro/ directly, nothing leaves this machine. Ctrl+C to stop.")
+  console.log(`${pc.bold("klaroshield dashboard")} running at ${pc.cyan(url)}`)
+  console.log(pc.dim("Local only — reads .klaro/ directly, nothing leaves this machine. Ctrl+C to stop."))
   openBrowser(url)
 
   process.on("SIGINT", () => {

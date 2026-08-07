@@ -1,3 +1,4 @@
+import pc from "picocolors"
 import type { Middleware } from "../types.js"
 import { appendJsonLine } from "../storage/local-store.js"
 
@@ -60,11 +61,11 @@ function writeLog(record: LogRecord, format: "pretty" | "json" | "silent"): void
     return
   }
 
-  const status = record.ok ? "\x1b[32m✓\x1b[0m" : "\x1b[31m✗\x1b[0m"
+  const status = record.ok ? pc.green("✓") : pc.red("✗")
   const flags: string[] = []
-  if (record.secretHits) flags.push("\x1b[33msecrets redacted\x1b[0m")
-  if (record.piiHits) flags.push("\x1b[33mPII redacted\x1b[0m")
+  if (record.secretHits) flags.push(pc.yellow("secrets redacted"))
+  if (record.piiHits) flags.push(pc.yellow("PII redacted"))
   const flagStr = flags.length ? ` [${flags.join(", ")}]` : ""
   const attemptStr = record.attempt > 1 ? ` (attempt ${record.attempt})` : ""
-  console.log(`[klaroshield] ${status} ${record.durationMs}ms${attemptStr}${flagStr}${record.error ? ` — ${record.error}` : ""}`)
+  console.log(`${pc.dim("[klaroshield]")} ${status} ${record.durationMs}ms${attemptStr}${flagStr}${record.error ? ` ${pc.red(`— ${record.error}`)}` : ""}`)
 }

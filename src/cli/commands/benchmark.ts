@@ -1,3 +1,5 @@
+import pc from "picocolors"
+import ora from "ora"
 import { benchmark as runBenchmark } from "../../benchmark.js"
 import { readJsonLines } from "../../storage/local-store.js"
 
@@ -30,9 +32,12 @@ function estimateMonthlySavings(cheapestCostUsd: number): { currentMonthlySpend:
 }
 
 export async function benchmark(): Promise<void> {
-  console.log("\x1b[1mBenchmarking Providers\x1b[0m\n")
+  console.log(pc.bold("Benchmarking Providers"))
 
+  const spinner = ora("Sending a real test call to each configured provider...").start()
   const { results, recommendation } = await runBenchmark()
+  spinner.stop()
+  console.log()
 
   // Markdown table -- copy-pasteable straight into a PR description or
   // Slack message, which is the actual reason to format it this way
@@ -42,22 +47,22 @@ export async function benchmark(): Promise<void> {
   for (const r of results) {
     const latencyStr = r.latencyMs !== undefined ? `${r.latencyMs}ms` : "—"
     const costStr = r.costUsd !== undefined ? (r.costUsd === 0 ? "$0 (local)" : `$${r.costUsd.toFixed(4)}`) : "—"
-    const statusStr = r.ok ? "✓" : `⚠ ${r.error}`
+    const statusStr = r.ok ? pc.green("✓") : `${pc.yellow("⚠")} ${r.error}`
     console.log(`| ${r.provider} | ${r.model} | ${latencyStr} | ${costStr} | ${statusStr} |`)
   }
 
   if (!recommendation) {
-    console.log("\nNo provider with both a configured key and known pricing responded successfully -- nothing to recommend.")
+    console.log(`\n${pc.dim("No provider with both a configured key and known pricing responded successfully -- nothing to recommend.")}`)
     return
   }
 
-  console.log(`\n**Recommendation:** ${recommendation.provider} (${recommendation.model}) — ${recommendation.reason}`)
+  console.log(`\n${pc.bold("Recommendation:")} ${recommendation.provider} (${recommendation.model}) — ${recommendation.reason}`)
 
   const cheapest = results.find((r) => r.provider === recommendation.provider && r.model === recommendation.model)
   if (cheapest?.costUsd !== undefined) {
     const savings = estimateMonthlySavings(cheapest.costUsd)
     if (savings) {
-      console.log(`**Estimated monthly savings:** $${savings.projectedSavings.toFixed(2)} (based on this month's recorded usage: $${savings.currentMonthlySpend.toFixed(2)} so far)`)
+      console.log(`${pc.bold("Estimated monthly savings:")} ${pc.green(`$${savings.projectedSavings.toFixed(2)}`)} (based on this month's recorded usage: $${savings.currentMonthlySpend.toFixed(2)} so far)`)
     }
   }
 }

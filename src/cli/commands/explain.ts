@@ -1,3 +1,4 @@
+import pc from "picocolors"
 import { readJsonLines } from "../../storage/local-store.js"
 
 interface LogRecord {
@@ -40,7 +41,7 @@ export function explain(callIdPrefix?: string): void {
   const attempts = logs.filter((l) => l.callId === targetId).sort((a, b) => a.attempt - b.attempt)
   const final = attempts[attempts.length - 1]
 
-  console.log(`\x1b[1mklaro explain\x1b[0m — call ${targetId.slice(0, 8)} (${new Date(final.timestamp).toLocaleString()})\n`)
+  console.log(`${pc.bold("klaro explain")} — call ${targetId.slice(0, 8)} (${new Date(final.timestamp).toLocaleString()})\n`)
 
   const steps: string[] = []
 
@@ -71,10 +72,10 @@ export function explain(callIdPrefix?: string): void {
 
   if (attempts.length > 1) {
     const totalMs = attempts.reduce((sum, a) => sum + a.durationMs, 0)
-    console.log(`\n${attempts.length} attempts, ${totalMs}ms total, ${final.ok ? "\x1b[32msucceeded\x1b[0m" : "\x1b[31mfailed\x1b[0m"} in the end.`)
+    console.log(`\n${attempts.length} attempts, ${totalMs}ms total, ${final.ok ? pc.green("succeeded") : pc.red("failed")} in the end.`)
   }
 
   if (!final.ok) {
-    console.log(`\n\x1b[31mNo successful attempt.\x1b[0m Check retries({ max }) if this call should retry further, or the error above for what the provider actually said.`)
+    console.log(`\n${pc.red("No successful attempt.")} Check retries({ max }) if this call should retry further, or the error above for what the provider actually said.`)
   }
 }

@@ -1,5 +1,6 @@
 import { existsSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
+import pc from "picocolors"
 
 const TEMPLATE = `import { Klaro, retries, budget, secrets, pii, logging } from "@klaroshield/sdk";
 
@@ -17,13 +18,13 @@ export const klaro = new Klaro()
 export function init(): void {
   const path = join(process.cwd(), "klaro.config.ts")
   if (existsSync(path)) {
-    console.log(`\x1b[33m⚠\x1b[0m klaro.config.ts already exists — not overwriting.`)
+    console.log(`${pc.yellow("⚠")} klaro.config.ts already exists — not overwriting.`)
     return
   }
   writeFileSync(path, TEMPLATE, "utf8")
-  console.log("\x1b[32m✓\x1b[0m Created klaro.config.ts")
-  console.log("\nNext step — wrap your existing AI call:\n")
-  console.log("  import { klaro } from \"./klaro.config\";")
-  console.log("  const chat = klaro.wrap(openai.chat.completions.create.bind(openai.chat.completions));")
-  console.log("\nNo account, no API key, no cloud dependency required to use any of this.")
+  console.log(`${pc.green("✓")} Created klaro.config.ts`)
+  console.log(pc.bold("\nNext step — wrap your existing AI call:\n"))
+  console.log(pc.cyan("  import { klaro } from \"./klaro.config\";"))
+  console.log(pc.cyan("  const chat = klaro.wrap(openai.chat.completions.create.bind(openai.chat.completions));"))
+  console.log(pc.dim("\nNo account, no API key, no cloud dependency required to use any of this."))
 }

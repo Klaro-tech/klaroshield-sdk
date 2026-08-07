@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs"
 import { pathToFileURL } from "node:url"
 import { join } from "node:path"
+import pc from "picocolors"
 import { simulate as runSimulation, ALL_SCENARIOS, type SimulationScenario } from "../../simulate.js"
 import type { Klaro } from "../../klaro.js"
 
@@ -47,13 +48,13 @@ export async function simulate(): Promise<void> {
     return
   }
 
-  console.log("\x1b[1mklaro simulate\x1b[0m — testing your configured pipeline against common failure modes\n")
+  console.log(`${pc.bold("klaro simulate")} — testing your configured pipeline against common failure modes\n`)
 
   for (const scenario of ALL_SCENARIOS) {
     const result = await runSimulation(klaro, scenario)
-    const icon = result.ok ? "\x1b[32m✓\x1b[0m" : "\x1b[31m✗\x1b[0m"
+    const icon = result.ok ? pc.green("✓") : pc.red("✗")
     console.log(`${icon} ${SCENARIO_LABELS[scenario].padEnd(20)} ${result.outcome} (${result.durationMs}ms)`)
   }
 
-  console.log("\nThis ran real synthetic calls through your actual retries()/budget()/secrets()/pii()/validation() config -- not a mock of what they'd do.")
+  console.log(pc.dim("\nThis ran real synthetic calls through your actual retries()/budget()/secrets()/pii()/validation() config -- not a mock of what they'd do."))
 }
