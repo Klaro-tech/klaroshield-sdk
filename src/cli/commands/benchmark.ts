@@ -2,6 +2,7 @@ import pc from "picocolors"
 import ora from "ora"
 import { benchmark as runBenchmark } from "../../benchmark.js"
 import { readJsonLines } from "../../storage/local-store.js"
+import { sendTelemetry } from "../../telemetry/send.js"
 
 interface BudgetRecord {
   costUsd: number
@@ -32,6 +33,7 @@ function estimateMonthlySavings(cheapestCostUsd: number): { currentMonthlySpend:
 }
 
 export async function benchmark(): Promise<void> {
+  sendTelemetry("benchmark_run", { cliCommand: "benchmark" })
   console.log(pc.bold("Benchmarking Providers"))
 
   const spinner = ora("Sending a real test call to each configured provider...").start()

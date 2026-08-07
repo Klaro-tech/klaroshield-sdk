@@ -4,6 +4,7 @@ import { join } from "node:path"
 import pc from "picocolors"
 import { simulate as runSimulation, ALL_SCENARIOS, type SimulationScenario } from "../../simulate.js"
 import type { Klaro } from "../../klaro.js"
+import { sendTelemetry } from "../../telemetry/send.js"
 
 const SCENARIO_LABELS: Record<SimulationScenario, string> = {
   rate_limit: "429 Rate Limit",
@@ -25,6 +26,7 @@ const SCENARIO_LABELS: Record<SimulationScenario, string> = {
  * to either compile it or run this via `node --import tsx`.
  */
 export async function simulate(): Promise<void> {
+  sendTelemetry("simulate_run", { cliCommand: "simulate" })
   const jsPath = join(process.cwd(), "klaro.config.js")
   const tsPath = join(process.cwd(), "klaro.config.ts")
 

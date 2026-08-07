@@ -65,7 +65,30 @@ npx klaro stats      # "Today's AI Health": retries saved, secrets/PII removed, 
 npx klaro explain    # plain-language narration of a call's full retry/redaction history
 npx klaro simulate   # runs rate-limit/500/timeout/bad-JSON/injection/huge-prompt scenarios through YOUR configured pipeline
 npx klaro version
+npx klaro telemetry status   # what's collected, what's never collected, enable/disable
 ```
+
+## Telemetry
+
+The CLI and SDK send anonymous, privacy-first product telemetry by
+default -- helps us understand adoption (installs, active projects,
+which middleware people actually use) without any registration.
+
+**Never sent, ever:** prompts, responses, model output, API keys,
+secrets, PII, local file paths, or anything from `.klaro/logs.jsonl`.
+Only: a random installation ID (a UUID, never derived from your
+hardware), which middleware you've configured, SDK/Node version,
+platform, and which CLI command ran.
+
+Fully transparent, fully optional:
+
+```bash
+npx klaro telemetry status    # see exactly what's collected
+npx klaro telemetry disable   # opt out -- the SDK stays fully functional
+```
+
+or set `KLARO_TELEMETRY=0` in your environment, which always overrides
+`.klaro/config.json`. See [klaro.services/klaroshield/privacy](https://klaro.services/klaroshield/privacy) for the full policy.
 
 ## Middleware
 

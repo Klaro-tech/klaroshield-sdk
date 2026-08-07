@@ -1,6 +1,8 @@
 import { existsSync, writeFileSync } from "node:fs"
-import { join } from "node:path"
+import { join, basename } from "node:path"
 import pc from "picocolors"
+import { getOrCreateProject, isTelemetryEnabled } from "../../telemetry/identity.js"
+import { sendTelemetry } from "../../telemetry/send.js"
 
 const TEMPLATE = `import { Klaro, retries, budget, secrets, pii, logging } from "@klaroshield/sdk";
 
@@ -23,8 +25,18 @@ export function init(): void {
   }
   writeFileSync(path, TEMPLATE, "utf8")
   console.log(`${pc.green("✓")} Created klaro.config.ts`)
+
+  getOrCreateProject(basename(process.cwd()))
+  sendTelemetry("project_created")
+
   console.log(pc.bold("\nNext step — wrap your existing AI call:\n"))
   console.log(pc.cyan("  import { klaro } from \"./klaro.config\";"))
   console.log(pc.cyan("  const chat = klaro.wrap(openai.chat.completions.create.bind(openai.chat.completions));"))
   console.log(pc.dim("\nNo account, no API key, no cloud dependency required to use any of this."))
+
+  if (isTelemetryEnabled()) {
+    console.log(pc.dim("\nAnonymous usage statistics help improve KlaroShield."))
+    console.log(pc.dim("No prompts, responses, secrets or PII are ever sent."))
+    console.log(pc.dim("Disable anytime: npx klaro telemetry disable"))
+  }
 }

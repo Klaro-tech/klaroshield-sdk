@@ -1,6 +1,7 @@
 import { exec } from "node:child_process"
 import pc from "picocolors"
 import { startDashboardServer } from "../../dashboard/server.js"
+import { sendTelemetry } from "../../telemetry/send.js"
 
 // Cross-platform "open in default browser" without adding a dependency
 // (the `open` npm package is the usual choice, but this CLI's whole
@@ -26,6 +27,7 @@ function openBrowser(url: string): void {
  * of that feature given the data that actually (and correctly) exists.
  */
 export function dashboard(port: number): void {
+  sendTelemetry("dashboard_opened", { cliCommand: "dashboard" })
   const server = startDashboardServer(port)
   const url = `http://localhost:${port}`
   console.log(`${pc.bold("klaroshield dashboard")} running at ${pc.cyan(url)}`)

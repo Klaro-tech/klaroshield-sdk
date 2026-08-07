@@ -12,6 +12,7 @@ import { explain } from "./commands/explain.js"
 import { simulate } from "./commands/simulate.js"
 import { benchmark } from "./commands/benchmark.js"
 import { dashboard } from "./commands/dashboard.js"
+import { telemetryStatus, telemetryEnable, telemetryDisable } from "./commands/telemetry.js"
 
 // Read once at startup rather than hardcoding a second copy of the version
 // string here -- a hardcoded string previously drifted from
@@ -73,5 +74,24 @@ program
   .description("Open a local web dashboard (requests, cost, redactions, health) -- nothing leaves this machine")
   .option("-p, --port <port>", "port to listen on", "3456")
   .action((opts) => dashboard(Number(opts.port)))
+
+const telemetryCmd = program
+  .command("telemetry")
+  .description("Show or change anonymous usage telemetry settings")
+
+telemetryCmd
+  .command("status", { isDefault: true })
+  .description("Show what's collected and whether telemetry is enabled")
+  .action(telemetryStatus)
+
+telemetryCmd
+  .command("enable")
+  .description("Enable anonymous usage telemetry")
+  .action(telemetryEnable)
+
+telemetryCmd
+  .command("disable")
+  .description("Disable anonymous usage telemetry -- the SDK stays fully functional")
+  .action(telemetryDisable)
 
 program.parse()

@@ -1,5 +1,6 @@
 import type { Middleware } from "../types.js"
 import { deepRedact, type RedactionRule } from "./redact-utils.js"
+import { sendTelemetry } from "../telemetry/send.js"
 
 export interface SecretsOptions {
   /** "mask" replaces matches with a placeholder before the call goes out; "block" throws instead of ever sending the call. Default "mask". */
@@ -21,6 +22,7 @@ const SECRET_RULES: RedactionRule[] = [
 ]
 
 export function secrets(options: SecretsOptions = {}): Middleware {
+  sendTelemetry("middleware_secret_enabled")
   const mode = options.mode ?? "mask"
 
   return async (args, next, ctx) => {

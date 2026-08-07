@@ -1,5 +1,6 @@
 import pc from "picocolors"
 import { readJsonLines, readJson } from "../../storage/local-store.js"
+import { sendTelemetry } from "../../telemetry/send.js"
 
 interface LogRecord {
   ok: boolean
@@ -44,6 +45,7 @@ function computeHealthScore(retryRate: number, failureRate: number): number {
 }
 
 export function stats(): void {
+  sendTelemetry("stats_run", { cliCommand: "stats" })
   const logs = readJsonLines<LogRecord>("logs")
   const spend = readJsonLines<BudgetRecord>("budget")
   const budgetConfig = readJson<BudgetConfig | null>("budget-config", null)

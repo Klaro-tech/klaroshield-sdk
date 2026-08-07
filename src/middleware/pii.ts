@@ -1,5 +1,6 @@
 import type { Middleware } from "../types.js"
 import { deepRedact, type RedactionRule } from "./redact-utils.js"
+import { sendTelemetry } from "../telemetry/send.js"
 
 export type PiiType = "email" | "phone" | "ssn" | "credit_card"
 
@@ -27,6 +28,7 @@ const PII_RULES: Record<PiiType, RedactionRule> = {
 }
 
 export function pii(options: PiiOptions = {}): Middleware {
+  sendTelemetry("middleware_pii_enabled")
   const mode = options.mode ?? "mask"
   const types = options.types ?? (Object.keys(PII_RULES) as PiiType[])
   const rules = types.map((t) => PII_RULES[t])

@@ -4,6 +4,8 @@ import pc from "picocolors"
 import ora from "ora"
 import { readJsonLines } from "../../storage/local-store.js"
 import { PRICING_TABLE, findPricing } from "../../middleware/pricing-table.js"
+import { sendTelemetry } from "../../telemetry/send.js"
+import { isTelemetryEnabled } from "../../telemetry/identity.js"
 
 interface Check {
   name: string
@@ -148,6 +150,7 @@ function computeHealthScore(checks: Check[]): number {
 }
 
 export async function doctor(): Promise<void> {
+  sendTelemetry("doctor_run", { cliCommand: "doctor" })
   console.log(pc.dim("────────────────────────────"))
   console.log(pc.bold("AI Runtime Health"))
   console.log(pc.dim("────────────────────────────\n"))
@@ -183,4 +186,8 @@ export async function doctor(): Promise<void> {
   const score = computeHealthScore(checks)
   const scoreText = score >= 90 ? pc.green(`${score}/100`) : score >= 70 ? pc.yellow(`${score}/100`) : pc.red(`${score}/100`)
   console.log(`\n${pc.bold("Health Score:")} ${scoreText}`)
+
+  if (isTelemetryEnabled()) {
+    console.log(pc.dim("\nAnonymous usage statistics help improve KlaroShield. No prompts, responses or secrets are ever sent. Disable anytime: npx klaro telemetry disable"))
+  }
 }

@@ -1,6 +1,7 @@
 import type { Middleware } from "../types.js"
 import { appendJsonLine, readJsonLines, writeJson } from "../storage/local-store.js"
 import { extractUsage, estimateCostUsd } from "./pricing-table.js"
+import { sendTelemetry } from "../telemetry/send.js"
 
 export interface BudgetOptions {
   maxMonthlyUsd: number
@@ -29,6 +30,7 @@ function monthToDateSpend(): number {
 }
 
 export function budget(options: BudgetOptions): Middleware {
+  sendTelemetry("middleware_budget_enabled")
   // Persisted so CLI commands (klaro stats/doctor) can show "budget
   // remaining" and similar without needing to import the developer's own
   // klaro.config.ts -- the config file is the source of truth while the

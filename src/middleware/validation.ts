@@ -1,4 +1,5 @@
 import type { Middleware } from "../types.js"
+import { sendTelemetry } from "../telemetry/send.js"
 
 // Duck-typed against Zod's actual shape rather than importing zod as a hard
 // dependency -- a developer not using structured output (or using a
@@ -35,6 +36,7 @@ function defaultExtractText(result: unknown): string | undefined {
 }
 
 export function validation<T = unknown>(options: ValidationOptions<T>): Middleware {
+  sendTelemetry("middleware_validation_enabled")
   const extractText = options.extractText ?? defaultExtractText
   const maxRetries = options.maxRetries ?? 2
 

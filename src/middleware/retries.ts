@@ -1,4 +1,5 @@
 import type { Middleware } from "../types.js"
+import { sendTelemetry } from "../telemetry/send.js"
 
 export interface RetriesOptions {
   /** Max attempts total, including the first -- max: 3 means up to 2 retries. Default 3. */
@@ -42,6 +43,7 @@ function sleep(ms: number): Promise<void> {
 }
 
 export function retries(options: RetriesOptions = {}): Middleware {
+  sendTelemetry("middleware_retry_enabled")
   const max = options.max ?? 3
   const backoff = options.backoff ?? "exponential"
   const baseDelayMs = options.baseDelayMs ?? 500

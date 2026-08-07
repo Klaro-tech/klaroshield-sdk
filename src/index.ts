@@ -10,3 +10,15 @@ export { logging, type LoggingOptions } from "./middleware/logging.js"
 
 export { simulate, ALL_SCENARIOS, type SimulationScenario, type SimulationResult } from "./simulate.js"
 export { benchmark, type BenchmarkResult, type ProviderBenchmark } from "./benchmark.js"
+
+export { sendTelemetry, type TelemetryEvent } from "./telemetry/send.js"
+export {
+  getOrCreateInstall,
+  getOrCreateProject,
+  isTelemetryEnabled,
+  readTelemetryConfig,
+  writeTelemetryConfig,
+  type InstallIdentity,
+  type ProjectIdentity,
+  type TelemetryConfig,
+} from "./telemetry/identity.js"
