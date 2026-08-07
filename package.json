@@ -1,0 +1,31 @@
+{
+  "name": "@klaroshield/sdk",
+  "version": "0.1.0",
+  "description": "The AI Runtime every AI application installs on Day 1 -- retries, budget control, secret/PII redaction, structured output validation, and local logging for LLM calls. Zero required cloud account.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "klaro": "./dist/cli/index.js"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "commander": "^13.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.8",
+    "@types/node": "^22.0.0"
+  },
+  "keywords": ["llm", "ai", "openai", "anthropic", "retries", "pii", "secrets", "runtime", "middleware"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Klaro-tech/klaroshield-sdk.git"
+  }
+}
