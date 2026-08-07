@@ -1,5 +1,5 @@
 import type { Middleware } from "../types.js"
-import { appendJsonLine, readJsonLines } from "../storage/local-store.js"
+import { appendJsonLine, readJsonLines, writeJson } from "../storage/local-store.js"
 import { extractUsage, estimateCostUsd } from "./pricing-table.js"
 
 export interface BudgetOptions {
@@ -13,6 +13,7 @@ export interface BudgetOptions {
 interface SpendRecord {
   costUsd: number
   timestamp: string
+  model?: string
 }
 
 function currentMonthKey(): string {
@@ -28,6 +29,14 @@ function monthToDateSpend(): number {
 }
 
 export function budget(options: BudgetOptions): Middleware {
+  // Persisted so CLI commands (klaro stats/doctor) can show "budget
+  // remaining" and similar without needing to import the developer's own
+  // klaro.config.ts -- the config file is the source of truth while the
+  // process is running, this is just a mirror for tooling that runs as a
+  // separate process later. Written once per middleware construction, not
+  // per call -- the cap doesn't change mid-run.
+  writeJson("budget-config", { maxMonthlyUsd: options.maxMonthlyUsd })
+
   return async (args, next, ctx) => {
     // Checked BEFORE the call, using spend recorded from prior calls --
     // this can't know the cost of the call about to happen (that only
@@ -53,7 +62,7 @@ export function budget(options: BudgetOptions): Middleware {
     if (usage) {
       const costUsd = estimateCostUsd(usage)
       if (costUsd !== null) {
-        appendJsonLine("budget", { costUsd, timestamp: new Date().toISOString() })
+        appendJsonLine("budget", { costUsd, model: usage.model, timestamp: new Date().toISOString() })
         ctx.meta.costUsd = costUsd
       }
       // costUsd === null means the model name wasn't in the pricing table --

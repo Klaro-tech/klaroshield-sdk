@@ -6,7 +6,7 @@ import { secrets } from "./middleware/secrets.js"
 import { pii } from "./middleware/pii.js"
 import { budget } from "./middleware/budget.js"
 import { logging } from "./middleware/logging.js"
-import { readJsonLines } from "./storage/local-store.js"
+import { readJsonLines, readJson } from "./storage/local-store.js"
 
 const KLARO_DIR = new URL("../.klaro", import.meta.url).pathname
 
@@ -91,9 +91,20 @@ describe("Klaro middleware pipeline", () => {
       usage: { prompt_tokens: 1000, completion_tokens: 500 },
     }))
     await wrapped()
-    const spend = readJsonLines<{ costUsd: number }>("budget")
+    const spend = readJsonLines<{ costUsd: number; model?: string }>("budget")
     expect(spend.length).toBe(1)
     expect(spend[0].costUsd).toBeGreaterThan(0)
+    // Real regression coverage for a bug caught while building the AI
+    // Doctor cost-recommendation feature: budget() persisted costUsd but
+    // silently dropped the model field, so anything reading .klaro/budget
+    // to recommend a cheaper model would never find one in real usage.
+    expect(spend[0].model).toBe("gpt-4o-mini")
+  })
+
+  it("persists the configured budget cap for other tools (e.g. the CLI) to read", async () => {
+    new Klaro().use(budget({ maxMonthlyUsd: 42 }))
+    const config = readJson<{ maxMonthlyUsd: number }>("budget-config", { maxMonthlyUsd: 0 })
+    expect(config.maxMonthlyUsd).toBe(42)
   })
 
   it("throws once monthly spend exceeds the cap", async () => {
