@@ -64,6 +64,8 @@ npx klaro inspect    # recent requests: latency, redactions
 npx klaro stats      # "Today's AI Health": retries saved, secrets/PII removed, cost, latency, budget remaining, health score
 npx klaro explain    # plain-language narration of a call's full retry/redaction history
 npx klaro simulate   # runs rate-limit/500/timeout/bad-JSON/injection/huge-prompt scenarios through YOUR configured pipeline
+npx klaro dashboard  # local web dashboard -- request stream, spend, redactions, health score
+npx klaro report --format md|json|html --out <path>   # export the same data as a file
 npx klaro version
 npx klaro telemetry status   # what's collected, what's never collected, enable/disable
 ```

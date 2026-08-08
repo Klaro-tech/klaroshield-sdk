@@ -13,6 +13,7 @@ import { simulate } from "./commands/simulate.js"
 import { benchmark } from "./commands/benchmark.js"
 import { dashboard } from "./commands/dashboard.js"
 import { telemetryStatus, telemetryEnable, telemetryDisable } from "./commands/telemetry.js"
+import { report } from "./commands/report.js"
 
 // Read once at startup rather than hardcoding a second copy of the version
 // string here -- a hardcoded string previously drifted from
@@ -74,6 +75,13 @@ program
   .description("Open a local web dashboard (requests, cost, redactions, health) -- nothing leaves this machine")
   .option("-p, --port <port>", "port to listen on", "3456")
   .action((opts) => dashboard(Number(opts.port)))
+
+program
+  .command("report")
+  .description("Export an AI runtime report (health score, spend, recent requests) as markdown, JSON, or HTML")
+  .option("-f, --format <format>", "md, json, or html", "md")
+  .option("-o, --out <path>", "write to a file instead of stdout")
+  .action((opts) => report(opts))
 
 const telemetryCmd = program
   .command("telemetry")

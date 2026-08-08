@@ -9,6 +9,7 @@ export type TelemetryEvent =
   | "simulate_run"
   | "benchmark_run"
   | "dashboard_opened"
+  | "report_run"
   | "middleware_retry_enabled"
   | "middleware_budget_enabled"
   | "middleware_pii_enabled"
