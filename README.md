@@ -65,9 +65,13 @@ npx klaro stats      # "Today's AI Health": retries saved, secrets/PII removed, 
 npx klaro explain    # plain-language narration of a call's full retry/redaction history
 npx klaro simulate   # runs rate-limit/500/timeout/bad-JSON/injection/huge-prompt scenarios through YOUR configured pipeline
 npx klaro dashboard  # local web dashboard -- request stream, spend, redactions, health score
-npx klaro report --format md|json|html --out <path>   # export the same data as a file
+npx klaro report --format md|json|html|pdf --out <path>   # export the same data as a file
 npx klaro version
 npx klaro telemetry status   # what's collected, what's never collected, enable/disable
+
+npx klaro cloud login    # open the Cloud dashboard to sign in and create a project
+npx klaro cloud link     # save a project API key locally so cloudSync() can authenticate
+npx klaro cloud status   # is this directory linked to a Cloud project?
 ```
 
 ## Telemetry
@@ -100,6 +104,25 @@ or set `KLARO_TELEMETRY=0` in your environment, which always overrides
 - **`pii({ mode, types })`** — deep-scans for email/phone/SSN/credit card, masks or blocks.
 - **`validation({ schema, extractText, maxRetries })`** — re-runs the call if the response doesn't parse as JSON or fails a Zod-compatible schema's `safeParse`.
 - **`logging({ format })`** — `"pretty"` (colored stdout), `"json"`, or `"silent"` (still persists to `.klaro/logs.jsonl`, just doesn't print).
+- **`cloudSync({ apiKey, apiBaseUrl, flushIntervalMs, maxBufferSize })`** — optional, additive. Buffers each call's real record and pushes it to [Klaro Cloud](https://klaro.services/klaroshield/cloud) on an interval, batched and non-blocking; sync failures never surface to your actual AI call. Never required — everything above works with zero network calls to a Klaro server.
+
+## Klaro Cloud (optional)
+
+```bash
+npx klaro cloud login   # opens klaro.services/klaroshield/cloud to sign in + create a project
+npx klaro cloud link    # paste the project's API key, saved to .klaro/cloud.json
+```
+
+```ts
+import { Klaro, retries, cloudSync } from "@klaroshield/sdk";
+
+const klaro = new Klaro()
+  .use(retries({ max: 3 }))
+  .use(cloudSync()); // reads the key from .klaro/cloud.json automatically
+```
+
+Team dashboards, cross-project budget aggregation, and shared alerts —
+sync target for what's already local, not a replacement for it.
 
 ## License
 
