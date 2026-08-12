@@ -1,27 +1,41 @@
 import { writeFileSync } from "node:fs"
 import pc from "picocolors"
 import { generateReport, renderMarkdown, renderJson, renderHtml } from "../../report.js"
+import { renderPdf } from "../../report-pdf.js"
 import { sendTelemetry } from "../../telemetry/send.js"
 
-export type ReportFormat = "md" | "json" | "html"
+export type ReportFormat = "md" | "json" | "html" | "pdf"
 
-function render(format: ReportFormat, data: ReturnType<typeof generateReport>): string {
-  if (format === "json") return renderJson(data)
-  if (format === "html") return renderHtml(data)
-  return renderMarkdown(data)
+const DEFAULT_OUT: Record<ReportFormat, string> = {
+  md: "klaro-report.md",
+  json: "klaro-report.json",
+  html: "klaro-report.html",
+  pdf: "klaro-report.pdf",
 }
 
-export function report(options: { format?: string; out?: string }): void {
+export async function report(options: { format?: string; out?: string }): Promise<void> {
   sendTelemetry("report_run", { cliCommand: "report" })
 
   const format = (options.format ?? "md") as ReportFormat
-  if (!["md", "json", "html"].includes(format)) {
-    console.log(`${pc.red("✗")} Unknown format "${options.format}" -- use md, json, or html.`)
+  if (!["md", "json", "html", "pdf"].includes(format)) {
+    console.log(`${pc.red("✗")} Unknown format "${options.format}" -- use md, json, html, or pdf.`)
     return
   }
 
   const data = generateReport()
-  const output = render(format, data)
+
+  // PDF is binary -- unlike the text formats, it can't be printed to
+  // stdout, so it always writes to a file (the given --out, or a sane
+  // default) rather than requiring --out to be passed every time.
+  if (format === "pdf") {
+    const bytes = await renderPdf(data)
+    const outPath = options.out ?? DEFAULT_OUT.pdf
+    writeFileSync(outPath, bytes)
+    console.log(`${pc.green("✓")} Report written to ${outPath}`)
+    return
+  }
+
+  const output = format === "json" ? renderJson(data) : format === "html" ? renderHtml(data) : renderMarkdown(data)
 
   if (options.out) {
     writeFileSync(options.out, output, "utf8")

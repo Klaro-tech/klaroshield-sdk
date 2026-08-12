@@ -78,8 +78,8 @@ program
 
 program
   .command("report")
-  .description("Export an AI runtime report (health score, spend, recent requests) as markdown, JSON, or HTML")
-  .option("-f, --format <format>", "md, json, or html", "md")
+  .description("Export an AI runtime report (health score, spend, recent requests) as markdown, JSON, HTML, or PDF")
+  .option("-f, --format <format>", "md, json, html, or pdf", "md")
   .option("-o, --out <path>", "write to a file instead of stdout")
   .action((opts) => report(opts))
 

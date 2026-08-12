@@ -1,6 +1,6 @@
 {
   "name": "@klaroshield/sdk",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "The AI Runtime every AI application installs on Day 1 -- retries, budget control, secret/PII redaction, structured output validation, and local logging for LLM calls. Zero required cloud account.",
   "license": "MIT",
   "type": "module",
@@ -9,7 +9,9 @@
   "bin": {
     "klaro": "./dist/cli/index.js"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",
@@ -17,17 +19,28 @@
   },
   "dependencies": {
     "commander": "^13.0.0",
-    "picocolors": "^1.1.1",
-    "ora": "^8.1.1"
+    "ora": "^8.1.1",
+    "pdf-lib": "^1.17.1",
+    "picocolors": "^1.1.1"
   },
   "devDependencies": {
-    "typescript": "^5.7.0",
-    "vitest": "^2.1.8",
+    "@anthropic-ai/sdk": "^0.32.0",
     "@types/node": "^22.0.0",
     "openai": "^4.77.0",
-    "@anthropic-ai/sdk": "^0.32.0"
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.8"
   },
-  "keywords": ["llm", "ai", "openai", "anthropic", "retries", "pii", "secrets", "runtime", "middleware"],
+  "keywords": [
+    "llm",
+    "ai",
+    "openai",
+    "anthropic",
+    "retries",
+    "pii",
+    "secrets",
+    "runtime",
+    "middleware"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Klaro-tech/klaroshield-sdk.git"
