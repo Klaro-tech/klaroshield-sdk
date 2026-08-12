@@ -66,6 +66,7 @@ export function budget(options: BudgetOptions): Middleware {
       if (costUsd !== null) {
         appendJsonLine("budget", { costUsd, model: usage.model, timestamp: new Date().toISOString() })
         ctx.meta.costUsd = costUsd
+        ctx.meta.model = usage.model
       }
       // costUsd === null means the model name wasn't in the pricing table --
       // silently skipped rather than thrown, per "reduce engineering work,

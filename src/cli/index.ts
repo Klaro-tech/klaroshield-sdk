@@ -14,6 +14,7 @@ import { benchmark } from "./commands/benchmark.js"
 import { dashboard } from "./commands/dashboard.js"
 import { telemetryStatus, telemetryEnable, telemetryDisable } from "./commands/telemetry.js"
 import { report } from "./commands/report.js"
+import { cloudLogin, cloudLink, cloudStatus } from "./commands/cloud.js"
 
 // Read once at startup rather than hardcoding a second copy of the version
 // string here -- a hardcoded string previously drifted from
@@ -82,6 +83,27 @@ program
   .option("-f, --format <format>", "md, json, html, or pdf", "md")
   .option("-o, --out <path>", "write to a file instead of stdout")
   .action((opts) => report(opts))
+
+const cloudCmd = program
+  .command("cloud")
+  .description("Klaro Cloud — opt-in sync for team dashboards, cross-project budgets, and alerts. Never required for the SDK to function.")
+
+cloudCmd
+  .command("login")
+  .description("Open the Cloud dashboard to sign in and create a project")
+  .action(() => cloudLogin())
+
+cloudCmd
+  .command("link")
+  .description("Save a project API key locally so cloudSync() can authenticate")
+  .option("-k, --key <key>", "project API key (prompts if omitted)")
+  .option("--api-url <url>", "override the Cloud API base URL")
+  .action((opts) => cloudLink(opts))
+
+cloudCmd
+  .command("status")
+  .description("Show whether this directory is linked to a Cloud project")
+  .action(() => cloudStatus())
 
 const telemetryCmd = program
   .command("telemetry")
