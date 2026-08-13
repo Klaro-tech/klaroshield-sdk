@@ -44,6 +44,24 @@ export function pii(options: PiiOptions = {}): Middleware {
         )
       }
     }
-    return next(value as typeof args)
+
+    const result = await next(value as typeof args)
+
+    // The provider's response can carry PII too -- it may echo the
+    // caller's own input back, or (rarely) surface something the model
+    // picked up elsewhere. Scanning only the outbound request left this
+    // half of the round trip completely unprotected, which is exactly
+    // what a "PII redaction" middleware exists to prevent.
+    const { value: redactedResult, hits: responseHits } = deepRedact(result, rules)
+    if (responseHits.length > 0) {
+      ctx.meta.piiHitsResponse = responseHits
+      if (mode === "block") {
+        throw new Error(
+          `[klaroshield] Blocked call: PII detected in the provider's response (${responseHits.map((h) => `${h.rule}×${h.count}`).join(", ")}). ` +
+            `Set pii({ mode: "mask" }) to redact instead of blocking.`
+        )
+      }
+    }
+    return redactedResult
   }
 }

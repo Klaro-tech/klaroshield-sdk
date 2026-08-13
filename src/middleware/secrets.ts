@@ -36,6 +36,23 @@ export function secrets(options: SecretsOptions = {}): Middleware {
         )
       }
     }
-    return next(value as typeof args)
+
+    const result = await next(value as typeof args)
+
+    // A provider response can echo a secret straight back (e.g. it was
+    // part of the prompt and the model repeats it, or a badly-behaved
+    // provider reflects request headers/bodies in error payloads).
+    // Scanning only the outbound call left that path completely open.
+    const { value: redactedResult, hits: responseHits } = deepRedact(result, SECRET_RULES)
+    if (responseHits.length > 0) {
+      ctx.meta.secretHitsResponse = responseHits
+      if (mode === "block") {
+        throw new Error(
+          `[klaroshield] Blocked call: secret(s) detected in the provider's response (${responseHits.map((h) => `${h.rule}×${h.count}`).join(", ")}). ` +
+            `Set secrets({ mode: "mask" }) to redact instead of blocking.`
+        )
+      }
+    }
+    return redactedResult
   }
 }
