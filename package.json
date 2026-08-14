@@ -1,6 +1,6 @@
 {
   "name": "@klaroshield/sdk",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "The AI Runtime every AI application installs on Day 1 -- retries, budget control, secret/PII redaction, structured output validation, and local logging for LLM calls. Zero required cloud account.",
   "license": "MIT",
   "type": "module",

@@ -16,7 +16,7 @@ describe("secrets middleware", () => {
     const wrapped = klaro.wrap(async () => ({
       choices: [{ message: { content: "Your key is sk-ABCDEF1234567890ABCDEF1234567890" } }],
     }))
-    const result = await wrapped([])
+    const result = await wrapped()
     const text = result.choices[0].message.content
     expect(text).not.toContain("sk-ABCDEF1234567890ABCDEF1234567890")
     expect(text).toContain("[REDACTED_OPENAI_KEY]")
@@ -25,6 +25,6 @@ describe("secrets middleware", () => {
   it("block mode throws on a secret found in the response", async () => {
     const klaro = new Klaro().use(secrets({ mode: "block" }))
     const wrapped = klaro.wrap(async () => ({ text: "AKIAABCDEFGHIJKLMNOP" }))
-    await expect(wrapped([])).rejects.toThrow(/secret\(s\) detected in the provider's response/)
+    await expect(wrapped()).rejects.toThrow(/secret\(s\) detected in the provider's response/)
   })
 })

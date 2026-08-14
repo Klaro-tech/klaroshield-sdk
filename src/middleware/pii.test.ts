@@ -18,7 +18,7 @@ describe("pii middleware", () => {
     const wrapped = klaro.wrap(async () => ({
       choices: [{ message: { content: "Sure, contact john@example.com, card 4242-4242-4242-4242" } }],
     }))
-    const result = await wrapped([])
+    const result = await wrapped()
     const text = result.choices[0].message.content
     expect(text).not.toContain("john@example.com")
     expect(text).not.toContain("4242-4242-4242-4242")
@@ -29,6 +29,6 @@ describe("pii middleware", () => {
   it("block mode throws on PII found in the response", async () => {
     const klaro = new Klaro().use(pii({ mode: "block" }))
     const wrapped = klaro.wrap(async () => ({ text: "ssn 123-45-6789" }))
-    await expect(wrapped([])).rejects.toThrow(/PII detected in the provider's response/)
+    await expect(wrapped()).rejects.toThrow(/PII detected in the provider's response/)
   })
 })
