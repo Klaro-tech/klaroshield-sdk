@@ -11,6 +11,8 @@ interface Check {
   name: string
   ok: boolean
   warn?: boolean
+  /** Genuinely unconfigured (not chosen by this developer), not a failure -- excluded from scoring entirely. */
+  skip?: boolean
   detail: string
 }
 
@@ -29,9 +31,21 @@ interface BudgetRecord {
 // -- costs nothing (no completion is generated), just proves the key
 // authenticates. Only runs when the key is actually set; an unset key is
 // reported as "not configured," not as a failed connection attempt.
+//
+// `skip: true` on the unset-key case is load-bearing (see
+// computeHealthScore): klaro is fully provider-agnostic (.wrap() takes
+// any async function, works with any provider), but this list can only
+// ever name a finite set of providers to actively probe. Confirmed live,
+// 2026-08-17: a developer using only Groq or Cerebras -- both real,
+// fully-supported providers, verified working in the Customer
+// Acceptance Sprint -- previously saw 3-4 unrelated "not set" warnings
+// and a docked score for providers they simply don't use, penalizing a
+// perfectly healthy setup for not using OpenAI/Claude/Gemini
+// specifically. An unconfigured provider is not evidence of anything
+// wrong and must not cost points.
 async function checkProviderConnection(name: string, envVar: string, url: string, headers: (key: string) => Record<string, string>): Promise<Check> {
   const key = process.env[envVar]
-  if (!key) return { name: `${name} Connected`, ok: false, warn: true, detail: `${envVar} not set` }
+  if (!key) return { name: `${name} Connected`, ok: false, warn: true, skip: true, detail: `${envVar} not set` }
   try {
     const res = await fetch(url, { headers: headers(key) })
     if (res.ok) return { name: `${name} Connected`, ok: true, detail: "authenticated" }
@@ -140,10 +154,11 @@ function computeHealthScore(checks: Check[]): number {
   // Weighted, not a plain pass/warn/fail average -- a missing provider key
   // (warn) shouldn't cost as much as a genuinely failed connection (fail),
   // and Node version / .klaro dir are minor relative to whether calls
-  // actually work.
+  // actually work. `skip` checks (a provider this developer simply
+  // doesn't use) are excluded entirely -- see checkProviderConnection.
   let score = 100
   for (const c of checks) {
-    if (c.ok) continue
+    if (c.ok || c.skip) continue
     score -= c.warn ? 5 : 15
   }
   return Math.max(0, Math.round(score))
@@ -167,6 +182,11 @@ export async function doctor(): Promise<void> {
     checkProviderConnection("OpenAI", "OPENAI_API_KEY", "https://api.openai.com/v1/models", (k) => ({ Authorization: `Bearer ${k}` })),
     checkProviderConnection("Claude", "ANTHROPIC_API_KEY", "https://api.anthropic.com/v1/models", (k) => ({ "x-api-key": k, "anthropic-version": "2023-06-01" })),
     checkProviderConnection("Gemini", "GEMINI_API_KEY", "https://generativelanguage.googleapis.com/v1beta/models", (k) => ({ "x-goog-api-key": k })),
+    // Groq and Cerebras -- real, fully-supported providers (klaro's
+    // .wrap() is provider-agnostic; these two are just as first-class as
+    // the three above), previously entirely absent from this list.
+    checkProviderConnection("Groq", "GROQ_API_KEY", "https://api.groq.com/openai/v1/models", (k) => ({ Authorization: `Bearer ${k}` })),
+    checkProviderConnection("Cerebras", "CEREBRAS_API_KEY", "https://api.cerebras.ai/v1/models", (k) => ({ Authorization: `Bearer ${k}` })),
   ])
   spinner.stop()
 
