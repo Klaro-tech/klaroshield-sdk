@@ -6,11 +6,11 @@ import { deepRedact, type RedactionRule } from "./redact-utils.js"
 describe("vulnSignatures middleware", () => {
   it("flags a known-vulnerable log4j-core version in the outbound request WITHOUT altering the text", async () => {
     const klaro = new Klaro().use(vulnSignatures())
-    const wrapped = klaro.wrap(async (arg: { text: string }, ctx) => {
+    const wrapped = klaro.wrap(async (arg: { text: string }) => {
       // the whole point of "flag" -- the vulnerable string must still be
       // present for the wrapped call to see, not redacted away.
       expect(arg.text).toContain("log4j-core:2.14.1")
-      return { echo: arg.text, hits: ctx?.meta.vulnSignatureHits }
+      return { echo: arg.text }
     })
     const result = await wrapped({ text: "we use log4j-core:2.14.1 in this service" })
     expect(result.echo).toContain("log4j-core:2.14.1")
