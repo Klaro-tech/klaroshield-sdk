@@ -14,6 +14,7 @@ export type TelemetryEvent =
   | "middleware_budget_enabled"
   | "middleware_pii_enabled"
   | "middleware_secret_enabled"
+  | "middleware_vuln_signatures_enabled"
   | "middleware_validation_enabled"
   | "cloud_login"
   | "cloud_project_connected"

@@ -1,0 +1,28 @@
+name: Dependency Audit
+
+# KlaroShield vuln-mgmt phase 2 (hardening our own supply chain): this SDK
+# ships as a dependency in other people's PII/secrets-handling pipelines --
+# a known-vulnerable transitive dependency here is a real risk to every
+# customer install, not just this repo. Weekly + on-demand, separate from
+# test.yml so a flaky/failing audit never blocks a real push/PR.
+on:
+  schedule:
+    - cron: '0 6 * * 1' # Monday 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: [self-hosted, hetzner]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit
+        run: npm audit --audit-level=high
